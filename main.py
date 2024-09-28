@@ -1,12 +1,12 @@
+import os
 import csv
 import sqlite3
-import tkinter as tk
-from tkinter import filedialog
+from datetime import datetime
 
 
 def criar_tabela_livros():
     
-    conn = sqlite3.connect('livraria.db')
+    conn = sqlite3.connect('data/livraria.db')
     cursor = conn.cursor()
     
     cursor.execute("""
@@ -27,7 +27,7 @@ def adicionar_livro():
     preco = float(input("Digite o preço do livro: "))
     
     # Conectar ao banco de dados
-    conn = sqlite3.connect('livraria.db')
+    conn = sqlite3.connect('data/livraria.db')
     cursor = conn.cursor()
     
     # Inserir dados na tabela
@@ -46,7 +46,7 @@ def adicionar_livro():
     
 def exibir_todos_livros():
     # Conectar ao banco de dados
-    conn = sqlite3.connect('livraria.db')
+    conn = sqlite3.connect('data/livraria.db')
     cursor = conn.cursor()
     
     # Selecionar todos os registros da tabela
@@ -65,7 +65,7 @@ def exibir_todos_livros():
     
 def atualizar_preco_livro():
     # Conectar ao banco de dados
-    conn = sqlite3.connect('livraria.db')
+    conn = sqlite3.connect('data/livraria.db')
     cursor = conn.cursor()
     
     # Atualizar preço de um livro
@@ -83,7 +83,7 @@ def atualizar_preco_livro():
     
 def remover_livro():
     # Conectar ao banco de dados
-    conn = sqlite3.connect('livraria.db')
+    conn = sqlite3.connect('data/livraria.db')
     cursor = conn.cursor()
     
     # Remover livro
@@ -101,7 +101,7 @@ def buscar_livros_por_autor():
     
     autor_pesquisa = input("Digite o nome do autor: ").strip().lower()
     
-    conn = sqlite3.connect('livraria.db')
+    conn = sqlite3.connect('data/livraria.db')
     cursor = conn.cursor()    
     
     cursor.execute("""
@@ -122,19 +122,29 @@ def buscar_livros_por_autor():
 
 def exportar_dados_para_csv():
     # Conectar ao banco de dados
-    conn = sqlite3.connect('livraria.db')
+    conn = sqlite3.connect('data/livraria.db')
     cursor = conn.cursor()
     
     # Selecionar todos os registros da tabela
     cursor.execute("SELECT * FROM livros")
     livros = cursor.fetchall()
     
-    # Exportar dados para CSV
-    with open('livros.csv', 'w') as arquivo:
-        for livro in livros:
-            arquivo.write(f"{livro[0]},{livro[1]},{livro[2]},{livro[3]}\n")
+    # Criar a pasta 'exports' se não existir
+    if not os.path.exists('exports'):
+        os.makedirs('exports')
     
-    print("Dados exportados com sucesso.")
+    # Gerar o nome do arquivo com data e hora
+    data_hora = datetime.now().strftime("%Y%m%d_%H%M%S")
+    nome_arquivo = f"exports/livros_{data_hora}.csv"
+    
+    # Exportar dados para CSV
+    with open(nome_arquivo, 'w', newline='') as arquivo:
+        escritor_csv = csv.writer(arquivo)
+        escritor_csv.writerow(['ID', 'Título', 'Autor', 'Preço'])  # Cabeçalho
+        for livro in livros:
+            escritor_csv.writerow(livro)
+    
+    print(f"Dados exportados com sucesso para {nome_arquivo}.")
     conn.close()
 
 def importar_dados_de_csv():
@@ -146,7 +156,7 @@ def importar_dados_de_csv():
         next(leitor_csv)  # Pular o cabeçalho
         
         # Conectar ao banco de dados
-        conn = sqlite3.connect('livraria.db')
+        conn = sqlite3.connect('data/livraria.db')
         cursor = conn.cursor()
         
         # Inserir os dados na tabela
@@ -171,6 +181,25 @@ def importar_dados_de_csv():
         
         # Fechar conexão
         conn.close()
+
+def fazer_backup():
+    # Conectar ao banco de dados
+    conn = sqlite3.connect('data/livraria.db')
+    cursor = conn.cursor()
+    
+    # Gerar o nome do arquivo com data e hora
+    data_hora = datetime.now().strftime("%Y%m%d_%H%M%S")
+    nome_arquivo = f"backups/livraria_{data_hora}.db"
+    
+    # Copiar o arquivo do banco de dados
+    with open(nome_arquivo, 'wb') as arquivo:
+        for parte in conn.iterdump():
+            arquivo.write(f"{parte}\n".encode('utf-8'))
+    
+    print(f"Backup do banco de dados feito com sucesso: {nome_arquivo}")
+    
+    # Fechar conexão
+    conn.close()
 
 while True:
     print()
@@ -205,7 +234,7 @@ while True:
     elif opcao == '7':
         importar_dados_de_csv()
     elif opcao == '8':
-        print('Fazer backup do banco de dados')
+        fazer_backup()
     elif opcao == '9':
         print('Sair')
         break

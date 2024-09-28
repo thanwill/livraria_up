@@ -1,0 +1,16 @@
+BEGIN TRANSACTION;
+CREATE TABLE livros (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    titulo TEXT NOT NULL,
+    autor TEXT NOT NULL,
+    preco REAL NOT NULL
+);
+INSERT INTO "livros" VALUES(1,'Meu Primeiro Livro','Jonathan ',23.98);
+INSERT INTO "livros" VALUES(2,'Viagem ao Centro da Terra','Júlio Verne',35.99);
+INSERT INTO "livros" VALUES(3,'Orgulho e Preconceito','Jane Austen',42.5);
+INSERT INTO "livros" VALUES(4,'Cem Anos de Solidão','Gabriel García Márquez',58.9);
+INSERT INTO "livros" VALUES(5,'Dom Quixote','Miguel de Cervantes',49.3);
+INSERT INTO "livros" VALUES(6,'O Morro dos Ventos Uivantes','Emily Brontë',49.9);
+DELETE FROM "sqlite_sequence";
+INSERT INTO "sqlite_sequence" VALUES('livros',6);
+COMMIT;
